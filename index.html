@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+
+<body>
+
+<div id="loginBox">
+
+<form id="loginForm">
+
+<h2>Login</h2>
+
+<input type="text" placeholder="Username" id="username" required>
+<input type="password" placeholder="Password" id="password" required>
+
+<button class="btn">Login</button>
+
+</form>
+
+</div>
+
+<header>
+
+<h2>Zero Hunger</h2>
+
+<nav >
+
+<a href="#">Home</a>
+<a href="#donate">Donate</a>
+<a href="#foodlist">Food</a>
+<a href="#volunteer">Volunteer</a>
+<a href="#map">Map</a>
+<a href="#dashboard">Dashboard</a>
+
+<button onclick="toggleMode()">Mode</button>
+
+</nav>
+
+</header>
+
+<section class="hero ">
+
+<h1>Stop Food Waste</h1>
+<link rel="stylesheet" href="style.css">
+
+<p>Connecting restaurants, volunteers and communities to reduce hunger.</p>
+<img src="https://blog.akshayapatra.org/wp-content/uploads/2023/07/Banner1160X450.jpg" alt="">
+<br>
+<br>
+<button class="btn" onclick="scrollDonate()">Donate Food</button>
+
+</section>
+
+<section class="section">
+
+<div class="cards">
+
+<div class="card">
+<h3>Donate Food</h3>
+<p>Restaurants share extra food.</p>
+</div>
+
+<div class="card">
+<h3>Find Food</h3>
+<p>Volunteers collect food.</p>
+</div>
+
+<div class="card">
+<h3>Feed People</h3>
+<p>Help reduce hunger.</p>
+</div>
+
+</div>
+
+</section>
+
+<section id="donate" class="section">
+
+<form id="foodForm">
+
+<h2>Food Donation</h2>
+
+<input type="text" placeholder="Restaurant Name" id="restaurant" required>
+<input type="text" placeholder="Food Name" id="food" required>
+<input type="number" placeholder="Quantity" id="quantity" required>
+<input type="text" placeholder="Location" id="location" required>
+
+<button class="btn">Submit</button>
+
+</form>
+
+</section>
+
+<section id="foodlist" class="section">
+
+<h2 style="text-align:center;margin-bottom:15px;">Available Food</h2>
+
+<input type="text" id="search" placeholder="Search location" style="padding:10px;margin-bottom:10px">
+
+<table>
+
+<thead>
+<tr>
+<th>Restaurant</th>
+<th>Food</th>
+<th>Qty</th>
+<th>Location</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="foodTable"></tbody>
+
+</table>
+
+</section>
+
+<section id="volunteer" class="section">
+
+<form id="volForm">
+
+<h2>Volunteer Registration</h2>
+
+<input type="text" placeholder="Name" id="vname" required>
+<input type="text" placeholder="Phone" id="vphone" required>
+<input type="text" placeholder="Vehicle" id="vvehicle">
+
+<button class="btn">Register</button>
+
+</form>
+
+</section>
+
+<section id="map" class="section">
+
+<h2 style="text-align:center;margin-bottom:15px;">Food Map</h2>
+
+<iframe src="https://www.openstreetmap.org/export/embed.html"></iframe>
+
+</section>
+
+<section id="dashboard" class="section">
+
+<div class="dashboard">
+
+<div class="stat">
+<h2 id="foodCount">0</h2>
+<p>Donations</p>
+</div>
+
+<div class="stat">
+<h2 id="peopleFed">0</h2>
+<p>Meals</p>
+</div>
+
+<div class="stat">
+<h2 id="restaurants">0</h2>
+<p>Restaurants</p>
+</div>
+
+</div>
+
+</section>
+
+<footer>
+<p>Hackathon Project | Zero Hunger</p>
+</footer>
+
+<div class="popup" id="popup">Food Added</div>
+
+<script>
+
+let login=document.getElementById("loginForm")
+
+login.addEventListener("submit",function(e){
+
+e.preventDefault()
+
+if(username.value.length>2 && password.value.length>2){
+loginBox.style.display="none"
+}
+
+})
+
+let form=document.getElementById("foodForm")
+
+form.addEventListener("submit",function(e){
+
+e.preventDefault()
+
+let data={
+restaurant:restaurant.value,
+food:food.value,
+quantity:quantity.value,
+location:location.value
+}
+
+let foods=JSON.parse(localStorage.getItem("foods"))||[]
+
+foods.push(data)
+
+localStorage.setItem("foods",JSON.stringify(foods))
+
+showPopup()
+
+form.reset()
+
+loadFoods()
+
+})
+
+function loadFoods(){
+
+let foods=JSON.parse(localStorage.getItem("foods"))||[]
+
+foodTable.innerHTML=""
+
+foods.forEach((f,i)=>{
+
+foodTable.innerHTML+=`
+<tr>
+<td>${f.restaurant}</td>
+<td>${f.food}</td>
+<td>${f.quantity}</td>
+<td>${f.location}</td>
+<td><button onclick="pickup(${i})">Pickup</button></td>
+</tr>
+`
+
+})
+
+updateDashboard()
+
+}
+
+function pickup(i){
+
+let foods=JSON.parse(localStorage.getItem("foods"))||[]
+
+foods.splice(i,1)
+
+localStorage.setItem("foods",JSON.stringify(foods))
+
+loadFoods()
+
+}
+
+search.addEventListener("keyup",function(){
+
+let s=this.value.toLowerCase()
+
+document.querySelectorAll("#foodTable tr").forEach(r=>{
+
+let loc=r.children[3].innerText.toLowerCase()
+
+r.style.display=loc.includes(s)?"":"none"
+
+})
+
+})
+
+function updateDashboard(){
+
+let foods=JSON.parse(localStorage.getItem("foods"))||[]
+
+foodCount.innerText=foods.length
+
+let total=0
+
+foods.forEach(f=>total+=parseInt(f.quantity))
+
+peopleFed.innerText=total
+
+restaurants.innerText=foods.length
+
+}
+
+function scrollDonate(){
+document.getElementById("donate").scrollIntoView()
+}
+
+function toggleMode(){
+document.body.classList.toggle("dark")
+}
+
+function showPopup(){
+
+popup.style.display="block"
+
+setTimeout(()=>popup.style.display="none",2000)
+
+}
+
+let volForm=document.getElementById("volForm")
+
+volForm.addEventListener("submit",function(e){
+
+e.preventDefault()
+
+alert("Volunteer Registered")
+
+volForm.reset()
+
+})
+
+loadFoods()
+
+</script>
+
+
+</body>
+</html>
